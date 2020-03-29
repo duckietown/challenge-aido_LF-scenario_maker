@@ -9,16 +9,18 @@ import yaml
 import duckietown_world as dw
 import geometry as g
 from aido_schemas import (
-    Context,
+
     protocol_scenario_maker,
     RobotConfiguration,
     Scenario,
     ScenarioRobotSpec,
-    wrap_direct,
+
 )
+from aido_schemas.protocol_simulator import MOTION_MOVING, MOTION_PARKED
 from duckietown_world import list_maps
 from duckietown_world.world_duckietown.map_loading import _get_map_yaml
 from duckietown_world.world_duckietown.sampling_poses import sample_good_starting_pose
+from zuper_nodes_wrapper import Context, wrap_direct
 
 
 @dataclass
@@ -32,12 +34,13 @@ class MyScenario(Scenario):
 class MyConfig:
     maps: Tuple[str, ...] = ("4way",)
     scenarios_per_map: int = 1
-    robots_npcs: int = 0
-    robots_pcs: int = 1
     theta_tol_deg: float = 20.0
     dist_tol_m: float = 0.05
     min_dist: float = 0.5
     only_straight: bool = True
+    robots_npcs: List[str] = ('npc1', 'npc2', 'npc3')
+    robots_pcs: List[str] = ('ego',)
+    robots_parked: List[str] = ('parked0',)
 
 
 @dataclass
@@ -62,6 +65,7 @@ class SimScenarioMaker:
 
     def _create_scenarios(self, context: Context):
         available = list_maps()
+
         for map_name in self.config.maps:
             if not map_name in available:
                 msg = f'Cannot find map name "{map_name}, know {available}'
@@ -80,7 +84,11 @@ class SimScenarioMaker:
             for imap in range(self.config.scenarios_per_map):
                 scenario_name = f"{map_name}-{imap}"
 
-                nrobots = self.config.robots_npcs + self.config.robots_pcs
+                num_pcs = len(self.config.robots_pcs)
+                num_npcs = len(self.config.robots_npcs)
+                num_parked = len(self.config.robots_parked)
+                nrobots = num_npcs + num_pcs + num_parked
+
                 poses = sample_many_good_starting_poses(
                     po,
                     nrobots,
@@ -90,34 +98,54 @@ class SimScenarioMaker:
                     delta_y_m=self.config.dist_tol_m,
                 )
 
-                poses_pcs = poses[: self.config.robots_pcs]
-                poses_npcs = poses[self.config.robots_pcs :]
+                poses_pcs = poses[:num_pcs]
+                poses = poses[num_pcs:]
+                #
+                poses_npcs = poses[:num_npcs]
+                poses = poses[num_npcs:]
+                #
+                poses_parked = poses[:num_parked]
+                poses = poses[num_parked:]
+                assert len(poses) == 0
 
                 robots = {}
-                for i in range(self.config.robots_pcs):
+                for i, robot_name in enumerate(self.config.robots_pcs):
                     pose = poses_pcs[i]
                     vel = g.se2_from_linear_angular([0, 0], 0)
 
-                    robot_name = "ego" if i == 0 else "player%d" % i
                     configuration = RobotConfiguration(pose=pose, velocity=vel)
 
                     robots[robot_name] = ScenarioRobotSpec(
-                        description="Playable robot",
+                        description=f"Playable robot {robot_name}",
                         playable=True,
                         configuration=configuration,
+                        motion=None
                     )
 
-                for i in range(self.config.robots_npcs):
+                for i, robot_name in enumerate(self.config.robots_npcs):
                     pose = poses_npcs[i]
                     vel = g.se2_from_linear_angular([0, 0], 0)
 
-                    robot_name = "npc%d" % i
                     configuration = RobotConfiguration(pose=pose, velocity=vel)
 
                     robots[robot_name] = ScenarioRobotSpec(
-                        description="NPC robot",
+                        description=f"NPC robot {robot_name}",
                         playable=False,
                         configuration=configuration,
+                        motion=MOTION_MOVING
+                    )
+
+                for i, robot_name in enumerate(self.config.robots_parked):
+                    pose = poses_parked[i]
+                    vel = g.se2_from_linear_angular([0, 0], 0)
+
+                    configuration = RobotConfiguration(pose=pose, velocity=vel)
+
+                    robots[robot_name] = ScenarioRobotSpec(
+                        description=f"Parked robot {robot_name}",
+                        playable=False,
+                        configuration=configuration,
+                        motion=MOTION_PARKED
                     )
 
                 ms = MyScenario(

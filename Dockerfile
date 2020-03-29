@@ -1,10 +1,16 @@
-FROM duckietown/aido-base-python3:daffy-aido4
+ARG AIDO_REGISTRY
+FROM ${AIDO_REGISTRY}/duckietown/aido-base-python3:daffy-aido4
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+ARG PIP_INDEX_URL
+ENV PIP_INDEX_URL=${PIP_INDEX_URL}
+
+COPY requirements* ./
+RUN pip install -r requirements.resolved
 RUN pipdeptree
 
 COPY . .
 
-ENV DISABLE_CONTRACTS=1
+RUN PYTHON_PATH=. python3 -c "import scenario_maker"
+
+
 ENTRYPOINT ["python3", "scenario_maker.py"]

@@ -1,13 +1,20 @@
+
+AIDO_REGISTRY ?= docker.io
+PIP_INDEX_URL ?= https://pypi.org/simple
+
 repo=challenge-aido_lf-scenario_maker
-# repo=$(shell basename -s .git `git config --get remote.origin.url`)
 branch=$(shell git rev-parse --abbrev-ref HEAD)
-tag=duckietown/$(repo):$(branch)
+tag=$(AIDO_REGISTRY)/duckietown/$(repo):$(branch)
 
-build:
-	docker build --pull -t $(tag) .
+update-reqs:
+	pur --index-url $(PIP_INDEX_URL) -r requirements.txt -f -m '*' -o requirements.resolved
+	aido-update-reqs requirements.resolved
 
-build-no-cache:
-	docker build --pull -t $(tag)  --no-cache .
+build: update-reqs
+	docker build --pull -t $(tag) --build-arg AIDO_REGISTRY=$(AIDO_REGISTRY) .
+
+build-no-cache: update-reqs
+	docker build --pull -t $(tag) --build-arg  AIDO_REGISTRY=$(AIDO_REGISTRY)  --no-cache .
 
 push: build
 	docker push $(tag)
