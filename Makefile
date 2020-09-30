@@ -2,7 +2,8 @@
 AIDO_REGISTRY ?= docker.io
 PIP_INDEX_URL ?= https://pypi.org/simple
 
-repo=challenge-aido_lf-scenario_maker
+repo0=$(shell basename -s .git `git config --get remote.origin.url`)
+repo=$(shell echo $(repo0) | tr A-Z a-z)
 branch=$(shell git rev-parse --abbrev-ref HEAD)
 tag=$(AIDO_REGISTRY)/duckietown/$(repo):$(branch)
 
