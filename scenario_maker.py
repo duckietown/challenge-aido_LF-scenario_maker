@@ -5,6 +5,7 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 import yaml
+from zuper_commons.logs import ZLogger
 
 import duckietown_world as dw
 import geometry as g
