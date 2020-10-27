@@ -9,18 +9,20 @@ import yaml
 import duckietown_world as dw
 import geometry as g
 from aido_schemas import (
-
     protocol_scenario_maker,
     RobotConfiguration,
     Scenario,
     ScenarioRobotSpec,
-
 )
 from aido_schemas.protocol_simulator import MOTION_MOVING, MOTION_PARKED
 from duckietown_world import list_maps
 from duckietown_world.world_duckietown.map_loading import _get_map_yaml
 from duckietown_world.world_duckietown.sampling_poses import sample_good_starting_pose
 from zuper_nodes_wrapper import Context, wrap_direct
+
+logger = ZLogger(__name__)
+__version__ = "6.0.0"
+logger.info(f"{__version__}")
 
 
 @dataclass
@@ -38,9 +40,9 @@ class MyConfig:
     dist_tol_m: float = 0.05
     min_dist: float = 0.5
     only_straight: bool = True
-    robots_npcs: List[str] = ('npc1', 'npc2', 'npc3')
-    robots_pcs: List[str] = ('ego',)
-    robots_parked: List[str] = ('parked0',)
+    robots_npcs: List[str] = ("npc1", "npc2", "npc3")
+    robots_pcs: List[str] = ("ego",)
+    robots_parked: List[str] = ("parked0",)
 
 
 @dataclass
@@ -119,7 +121,7 @@ class SimScenarioMaker:
                         description=f"Playable robot {robot_name}",
                         playable=True,
                         configuration=configuration,
-                        motion=None
+                        motion=None,
                     )
 
                 for i, robot_name in enumerate(self.config.robots_npcs):
@@ -132,7 +134,7 @@ class SimScenarioMaker:
                         description=f"NPC robot {robot_name}",
                         playable=False,
                         configuration=configuration,
-                        motion=MOTION_MOVING
+                        motion=MOTION_MOVING,
                     )
 
                 for i, robot_name in enumerate(self.config.robots_parked):
@@ -145,12 +147,10 @@ class SimScenarioMaker:
                         description=f"Parked robot {robot_name}",
                         playable=False,
                         configuration=configuration,
-                        motion=MOTION_PARKED
+                        motion=MOTION_PARKED,
                     )
 
-                ms = MyScenario(
-                    scenario_name=scenario_name, environment=yaml_str, robots=robots
-                )
+                ms = MyScenario(scenario_name=scenario_name, environment=yaml_str, robots=robots)
                 self.state.scenarios_to_go.append(ms)
 
     def on_received_seed(self, context: Context, data: int):
