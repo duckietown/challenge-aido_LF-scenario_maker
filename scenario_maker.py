@@ -21,7 +21,7 @@ from duckietown_world.world_duckietown.sampling_poses import sample_good_startin
 from zuper_nodes_wrapper import Context, wrap_direct
 
 logger = ZLogger(__name__)
-__version__ = "6.0.0"
+__version__ = "6.0.1"
 logger.info(f"{__version__}")
 
 
