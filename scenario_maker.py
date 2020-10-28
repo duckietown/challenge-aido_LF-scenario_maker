@@ -24,7 +24,7 @@ from duckietown_world.world_duckietown.map_loading import _get_map_yaml
 from duckietown_world.world_duckietown.sampling_poses import sample_good_starting_pose
 
 logger = ZLogger(__name__)
-__version__ = "6.0.2"
+__version__ = "6.0.3"
 logger.info(f"{__version__}")
 
 
