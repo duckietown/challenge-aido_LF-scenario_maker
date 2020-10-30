@@ -24,10 +24,10 @@ bump: # v2
 	git push
 
 build:
-	dts -q build_utils --dev aido-container-build
+	dts -q build_utils aido-container-build
 
 push: build
-	dts -q build_utils --dev aido-container-push
+	dts -q build_utils aido-container-push
 
 
 
