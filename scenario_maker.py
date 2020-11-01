@@ -67,8 +67,6 @@ class SimScenarioMaker:
 
             config = self.config
 
-            # yaml_str = update_map(yaml_str)
-
             yaml_data = yaml.load(s, Loader=yaml.SafeLoader)
             update_map(yaml_data)
             yaml_str = yaml.dump(yaml_data)
@@ -79,7 +77,7 @@ class SimScenarioMaker:
             delta_y_m = config.dist_tol_m
 
             for imap in range(self.config.scenarios_per_map):
-                scenario_name = f"{map_name}-{imap}"
+                scenario_name = f"{map_name}-sc{imap}"
 
                 ms = make_scenario(
                     yaml_str=yaml_str,
@@ -97,6 +95,8 @@ class SimScenarioMaker:
                     duckie_y_bounds=config.duckie_y_bounds,
                 )
                 self.state.scenarios_to_go.append(ms)
+
+            logger.info(scenarios=self.state.scenarios_to_go)
 
     def on_received_seed(self, context: Context, data: int):
         context.info(f"seed({data})")
