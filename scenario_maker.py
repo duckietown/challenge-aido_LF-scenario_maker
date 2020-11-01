@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Tuple
 
 import numpy as np
@@ -29,6 +29,10 @@ class MyConfig:
     robots_npcs: List[str] = ("npc1", "npc2", "npc3")
     robots_pcs: List[str] = ("ego",)
     robots_parked: List[str] = ("parked0",)
+    nduckies: int = 0
+    duckie_min_dist_from_other_duckie: float = 0.1
+    duckie_min_dist_from_robot: float = 0.2
+    duckie_y_bounds: List[float] = field(default_factory=lambda: [-0.1, 0.1])
 
 
 @dataclass
@@ -87,10 +91,10 @@ class SimScenarioMaker:
                     robots_npcs=config.robots_npcs,
                     delta_theta_rad=delta_theta_rad,
                     scenario_name=scenario_name,
-                    nduckies=0,
-                    duckie_min_dist_from_other_duckie=0.1,
-                    duckie_min_dist_from_robot=0.2,
-                    duckie_y_bounds=[-0.1, 0.1],
+                    nduckies=config.nduckies,
+                    duckie_min_dist_from_other_duckie=config.duckie_min_dist_from_other_duckie,
+                    duckie_min_dist_from_robot=config.duckie_min_dist_from_robot,
+                    duckie_y_bounds=config.duckie_y_bounds,
                 )
                 self.state.scenarios_to_go.append(ms)
 
