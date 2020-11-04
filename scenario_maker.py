@@ -96,7 +96,7 @@ class SimScenarioMaker:
                 )
                 self.state.scenarios_to_go.append(ms)
 
-            logger.info(scenarios=self.state.scenarios_to_go)
+            # logger.info(scenarios=self.state.scenarios_to_go)
 
     def on_received_seed(self, context: Context, data: int):
         context.info(f"seed({data})")
