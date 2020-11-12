@@ -6,9 +6,17 @@ from typing import List, Tuple
 import numpy as np
 import yaml
 from zuper_commons.logs import ZLogger
-from zuper_nodes_wrapper import Context, wrap_direct
+from zuper_commons.types import ZException
 
-from aido_schemas import protocol_scenario_maker, Scenario
+from aido_schemas import (
+    Context,
+    PROTOCOL_FULL,
+    PROTOCOL_NORMAL,
+    protocol_scenario_maker,
+    ProtocolDesc,
+    Scenario,
+    wrap_direct,
+)
 from duckietown_world import list_maps
 from duckietown_world.world_duckietown.map_loading import _get_map_yaml
 from duckietown_world.world_duckietown.sampling import make_scenario
@@ -33,6 +41,8 @@ class MyConfig:
     duckie_min_dist_from_other_duckie: float = 0.1
     duckie_min_dist_from_robot: float = 0.2
     duckie_y_bounds: List[float] = field(default_factory=lambda: [-0.1, 0.1])
+    pc_robot_protocol: ProtocolDesc = PROTOCOL_NORMAL
+    npc_robot_protocol: ProtocolDesc = PROTOCOL_FULL
 
 
 @dataclass
@@ -40,12 +50,27 @@ class MyState:
     scenarios_to_go: List[Scenario]
 
 
-def update_map(yaml_data):
+def update_map1(yaml_data):
     tiles = yaml_data["tiles"]
 
     for row in tiles:
         for i in range(len(row)):
             row[i] = row[i].replace("asphalt", "floor")
+
+
+def update_map2(yaml_data):
+    tiles = yaml_data["tiles"]
+
+    W = len(tiles[0])
+    F = "floor"
+    # noinspection PyListCreation
+    tiles2 = []
+    tiles2.append([F] * (W + 2))
+    for row in tiles:
+        row2 = [F] + row + [F]
+        tiles2.append(row2)
+    tiles2.append([F] * (W + 2))
+    yaml_data["tiles"] = tiles2
 
 
 class SimScenarioMaker:
@@ -60,15 +85,16 @@ class SimScenarioMaker:
 
         for map_name in self.config.maps:
             if not map_name in available:
-                msg = f'Cannot find map name "{map_name}, know {available}'
-                raise Exception(msg)
+                msg = f'Cannot find map name "{map_name}".'
+                raise ZException(msg, available=available)
 
             s: str = _get_map_yaml(map_name)
 
             config = self.config
 
             yaml_data = yaml.load(s, Loader=yaml.SafeLoader)
-            update_map(yaml_data)
+            update_map1(yaml_data)
+            # update_map1(yaml_data)
             yaml_str = yaml.dump(yaml_data)
 
             delta_theta_rad = np.deg2rad(config.theta_tol_deg)
