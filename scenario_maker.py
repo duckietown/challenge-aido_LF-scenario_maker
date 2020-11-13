@@ -21,7 +21,7 @@ from duckietown_world import list_maps
 from duckietown_world.world_duckietown.map_loading import _get_map_yaml
 from duckietown_world.world_duckietown.sampling import make_scenario
 
-logger = ZLogger(__name__)
+logger = ZLogger("scenario_maker")
 __version__ = "6.0.18"
 logger.info(f"{__version__}")
 
@@ -132,14 +132,17 @@ class SimScenarioMaker:
         self._create_scenarios(context)
 
     def on_received_next_scenario(self, context: Context):
+        context.info("received_next_scenario")
         if self.state.scenarios_to_go:
             scenario = self.state.scenarios_to_go.pop(0)
+            context.info("sent scenario")
             context.write("scenario", scenario)
         else:
+            context.info("sent finished = True")
             context.write("finished", None)
 
     def finish(self, context: Context):
-        pass
+        context.info("finish.")
 
 
 def main():
@@ -147,6 +150,7 @@ def main():
     protocol = protocol_scenario_maker
     protocol.outputs["scenario"] = Scenario
     wrap_direct(node=node, protocol=protocol)
+    logger.info("Graceful exit of scenario_maker")
 
 
 if __name__ == "__main__":
