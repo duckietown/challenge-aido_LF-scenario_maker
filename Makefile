@@ -24,10 +24,10 @@ bump: # v2
 	git push
 
 build:
-	dts build_utils aido-container-build
+	dts build_utils aido-container-build --use-branch daffy
 
 push: build
-	dts build_utils aido-container-push
+	dts build_utils aido-container-push --use-branch daffy
 
 
 
