@@ -17,7 +17,7 @@ from aido_schemas import (
     Scenario,
     wrap_direct,
 )
-from duckietown_world import list_maps
+from duckietown_world.resources import list_maps
 from duckietown_world.world_duckietown.map_loading import _get_map_yaml
 from duckietown_world.world_duckietown.sampling import make_scenario
 
