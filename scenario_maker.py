@@ -119,7 +119,10 @@ class SimScenarioMaker:
                     duckie_min_dist_from_other_duckie=config.duckie_min_dist_from_other_duckie,
                     duckie_min_dist_from_robot=config.duckie_min_dist_from_robot,
                     duckie_y_bounds=config.duckie_y_bounds,
+                    tree_density=0.0,
+                    tree_min_dist=0.2,
                 )
+
                 self.state.scenarios_to_go.append(ms)
 
             # logger.info(scenarios=self.state.scenarios_to_go)
