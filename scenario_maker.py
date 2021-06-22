@@ -22,7 +22,7 @@ from duckietown_world.world_duckietown.map_loading import _get_map_yaml
 from duckietown_world.world_duckietown.sampling import make_scenario
 
 logger = ZLogger("scenario_maker")
-__version__ = "6.0.26"
+__version__ = "6.0.27"
 logger.info(f"{__version__}")
 
 
